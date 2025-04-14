@@ -32,68 +32,65 @@ class VideoAudioMergerApp:
         self.enable_drag_and_drop()
 
     def create_widgets(self):
-        container = ttk.Frame(self.root, padding=10)
-        container.pack(fill="both", expand=True)
+        # 主框架與左右分區
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(padx=10, pady=10, fill="both", expand=True)
+
+        left_frame = ttk.Frame(main_frame)
+        left_frame.grid(row=0, column=0, sticky="n")
+
+        right_frame = ttk.Frame(main_frame)
+        right_frame.grid(row=0, column=1, sticky="n", padx=(20, 0))
 
         # 主題切換選單（放右上）
         theme_var = tk.StringVar(value="cosmo")
-        theme_menu = ttk.OptionMenu(container, theme_var, "cosmo", *ttk.Style().theme_names(), command=self.change_theme)
-        theme_menu.pack(side="top", anchor="ne", pady=5, padx=5)
+        theme_menu = ttk.OptionMenu(right_frame, theme_var, "cosmo", *ttk.Style().theme_names(), command=self.change_theme)
+        theme_menu.pack(side="top", anchor="ne", pady=3, padx=5)
 
-        # 狀態欄
-        self.status_label = ttk.Label(container, text="拖曳影片/音訊進來", foreground="gray")
-        self.status_label.pack(pady=(0, 10))
+        # 拖曳提示
+        self.status_label = ttk.Label(left_frame, text="拖曳影片/音訊進來", foreground="gray")
+        self.status_label.pack(pady=(0, 20))
 
-        # 區塊：來源檔案
-        source_box = ttk.LabelFrame(container, text="來源檔案", padding=10)
-        source_box.pack(fill="x", pady=5)
-
-        ttk.Button(source_box, text="選擇來源檔案 1", command=self.select_video1).pack(fill="x", pady=(2, 0))
+        # 來源檔案
+        source_box = ttk.LabelFrame(left_frame, text="來源檔案")
+        source_box.pack(fill="x", pady=(0, 10))
+        ttk.Button(source_box, text="選擇來源檔案 1", command=self.select_video1).pack(fill="x", padx=5, pady=2)
         self.video1_label = ttk.Label(source_box, text="未選擇", foreground="gray")
-        self.video1_label.pack(anchor="w", padx=5)
-
-        ttk.Button(source_box, text="選擇來源檔案 2", command=self.select_video2).pack(fill="x", pady=(8, 0))
+        self.video1_label.pack(anchor="w", padx=10)
+        ttk.Button(source_box, text="選擇來源檔案 2", command=self.select_video2).pack(fill="x", padx=5, pady=2)
         self.video2_label = ttk.Label(source_box, text="未選擇", foreground="gray")
-        self.video2_label.pack(anchor="w", padx=5)
+        self.video2_label.pack(anchor="w", padx=10)
 
-        # 區塊：合成參數
-        param_box = ttk.LabelFrame(container, text="合成參數設定", padding=10)
-        param_box.pack(fill="x", pady=5)
+        # 合成參數
+        param_box = ttk.LabelFrame(left_frame, text="合成參數設定")
+        param_box.pack(fill="x", pady=(0, 10))
+        ttk.Label(param_box, text="開始時間 (hh:mm:ss)").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        ttk.Entry(param_box, textvariable=self.start_time).grid(row=0, column=1, padx=5, pady=2)
+        ttk.Label(param_box, text="結束時間 (hh:mm:ss)").grid(row=1, column=0, sticky="w", padx=5, pady=2)
+        ttk.Entry(param_box, textvariable=self.end_time).grid(row=1, column=1, padx=5, pady=2)
+        ttk.Label(param_box, text="音量倍率").grid(row=2, column=0, sticky="w", padx=5, pady=2)
+        ttk.Entry(param_box, textvariable=self.volume).grid(row=2, column=1, padx=5, pady=2)
 
-        ttk.Label(param_box, text="開始時間 (hh:mm:ss)").grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        ttk.Entry(param_box, textvariable=self.start_time).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
+        # 輸出設定
+        output_box = ttk.LabelFrame(right_frame, text="輸出設定")
+        output_box.pack(fill="x", pady=(0, 10))
+        ttk.Label(output_box, text="輸出格式").pack(anchor="w", padx=5, pady=2)
+        ttk.Combobox(output_box, textvariable=self.output_format, values=["mp4", "mkv", "mp3"]).pack(fill="x", padx=5, pady=2)
+        ttk.Button(output_box, text="選擇輸出檔案", command=self.select_output_file).pack(fill="x", padx=5, pady=5)
 
-        ttk.Label(param_box, text="結束時間 (hh:mm:ss)").grid(row=1, column=0, sticky="w", padx=2, pady=2)
-        ttk.Entry(param_box, textvariable=self.end_time).grid(row=1, column=1, sticky="ew", padx=2, pady=2)
-
-        ttk.Label(param_box, text="音量倍率").grid(row=2, column=0, sticky="w", padx=2, pady=2)
-        ttk.Entry(param_box, textvariable=self.volume).grid(row=2, column=1, sticky="ew", padx=2, pady=2)
-
-        param_box.columnconfigure(1, weight=1)
-
-        # 區塊：輸出設定
-        output_box = ttk.LabelFrame(container, text="輸出設定", padding=10)
-        output_box.pack(fill="x", pady=5)
-
-        ttk.Label(output_box, text="輸出格式").grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        ttk.Combobox(output_box, textvariable=self.output_format, values=["mp4", "mkv", "mp3"]).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
-
-        ttk.Button(output_box, text="選擇輸出檔案", command=self.select_output_file).grid(row=1, column=0, columnspan=2, sticky="ew", pady=5)
-
-        output_box.columnconfigure(1, weight=1)
 
         # 區塊：字幕與預覽
-        subtitle_box = ttk.LabelFrame(container, text="進階功能", padding=10)
-        subtitle_box.pack(fill="x", pady=5)
+        subtitle_box = ttk.LabelFrame(right_frame, text="進階功能", padding=10)
+        subtitle_box.pack(fill="x", pady=(0, 10))
 
-        ttk.Button(subtitle_box, text="選擇字幕檔 (.srt)", command=self.select_subtitle_file).grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        ttk.Button(subtitle_box, text="選擇字幕檔 (.srt)", command=self.select_subtitle_file).pack(fill="x", padx=5, pady=2)
         self.subtitle_label = ttk.Label(subtitle_box, text="未選擇字幕")
-        self.subtitle_label.grid(row=0, column=1, sticky="w", padx=2, pady=2)
+        self.subtitle_label.pack(anchor="w", padx=10)
 
-        ttk.Button(subtitle_box, text="預覽影片片段", command=self.preview_video).grid(row=1, column=0, columnspan=2, sticky="ew", padx=2, pady=5)
+        ttk.Button(subtitle_box, text="預覽影片片段", command=self.preview_video).pack(fill="x", padx=5, pady=10)
 
         # 合成按鈕
-        ttk.Button(container, text="開始合成", command=self.start_merge, bootstyle="success").pack(fill="x", pady=(10, 0))
+        ttk.Button(main_frame, text="開始合成", command=self.start_merge, bootstyle="success").grid(row=1, column=0, columnspan=2, pady=10)
 
     def change_theme(self, theme_name):
         ttk.Style().theme_use(theme_name)
