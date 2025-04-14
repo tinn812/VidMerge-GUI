@@ -17,6 +17,8 @@ class VideoAudioMergerApp:
         self.end_time = tk.StringVar(value="99:59:59")
         self.volume = tk.DoubleVar(value=1.0)
         self.output_format = tk.StringVar(value="mp4")
+        self.subtitle_file = None
+
 
         self.create_widgets()
         self.enable_drag_and_drop()
@@ -30,6 +32,11 @@ class VideoAudioMergerApp:
 
         ttk.Button(frame, text="選擇來源檔案 1", command=self.select_video1).grid(row=1, column=0, sticky="w")
         ttk.Button(frame, text="選擇來源檔案 2", command=self.select_video2).grid(row=2, column=0, sticky="w")
+
+        ttk.Button(frame, text="選擇字幕檔 (.srt)", command=self.select_subtitle_file).grid(row=9, column=0, sticky="w")
+        self.subtitle_label = ttk.Label(frame, text="未選擇字幕")
+        self.subtitle_label.grid(row=9, column=1, sticky="w")
+
 
         ttk.Label(frame, text="開始時間 (hh:mm:ss)").grid(row=3, column=0, sticky="w")
         ttk.Entry(frame, textvariable=self.start_time).grid(row=3, column=1)
@@ -69,6 +76,13 @@ class VideoAudioMergerApp:
 
     def select_video2(self):
         self.video2 = filedialog.askopenfilename(title="選擇影片或音訊 2")
+
+    def select_subtitle_file(self):
+        file = filedialog.askopenfilename(title="選擇字幕檔案", filetypes=[("Subtitle files", "*.srt")])
+        if file:
+            self.subtitle_file = file
+            self.subtitle_label.config(text=os.path.basename(file))
+
 
     def select_output_file(self):
         filetypes = [(f"{self.output_format.get().upper()} files", f"*.{self.output_format.get()}")]
@@ -126,11 +140,21 @@ class VideoAudioMergerApp:
             "-to", end_time,
             "-i", video_source,
             "-shortest",
-            "-c:v", "copy",
             "-c:a", "aac",
             "-filter:a", f"volume={volume}",
-            self.output_file
         ]
+
+        # 若有字幕就加入字幕 filter，並使用 libx264 編碼影片
+        if self.subtitle_file:
+            # 處理字幕路徑：改成 ffmpeg 可接受格式
+            subtitle_path = self.subtitle_file.replace("\\", "/").replace(":", "\\:")
+            command += ["-vf", f"subtitles='{subtitle_path}'", "-c:v", "libx264"]
+        else:
+            command += ["-c:v", "copy"]
+
+
+        command.append(self.output_file)
+
 
         try:
             subprocess.run(command, check=True)
