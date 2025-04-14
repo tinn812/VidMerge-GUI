@@ -13,7 +13,8 @@
 - **音量調整**：可放大或縮小聲音音量  
 - **格式選擇**：支援 mp4、mkv、mp3  
 - **自訂輸出位置與檔名**  
-- **快速合併**：底層使用 FFmpeg 處理，不影響畫質與效能  
+- **快速合併**：底層使用 FFmpeg 處理，不影響畫質與效能
+- **新增上字幕功能**
 - **新增前5秒預覽功能**
 
 ---
@@ -68,7 +69,8 @@ VidMerge-GUI/
 ├── main.py        # 主程式
 ├── vidmerge_gui.py         # 功能
 ├── screenshot.png          # 介面截圖
-├── vidmerge_gui.spec       # 打包exe時可用
+├── test.srt                # 測試用字幕
+├── vidmerge_gui.spec       # 打包.exe時可用
 └── README.md
 ```
 
