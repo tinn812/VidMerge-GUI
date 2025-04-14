@@ -138,7 +138,4 @@ class VideoAudioMergerApp:
         except subprocess.CalledProcessError as e:
             messagebox.showerror("錯誤", f"合成失敗：{e}")
 
-if __name__ == "__main__":
-    root = TkinterDnD.Tk()
-    app = VideoAudioMergerApp(root)
-    root.mainloop()
+
