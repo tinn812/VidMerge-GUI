@@ -163,5 +163,3 @@ class VideoAudioMergerApp:
             messagebox.showerror("錯誤", f"合成失敗：{e}")
 
 
-# 功能開發中：支援字幕功能（subtitles）
-
