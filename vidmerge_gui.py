@@ -53,6 +53,9 @@ class VideoAudioMergerApp:
         ttk.Button(frame, text="選擇輸出檔案", command=self.select_output_file).grid(row=7, column=0, sticky="w")
 
         ttk.Button(frame, text="開始合成", command=self.start_merge).grid(row=8, column=0, columnspan=2, pady=10)
+        
+        ttk.Button(frame, text="預覽影片片段", command=self.preview_video).grid(row=10, column=0, columnspan=2)
+
 
     def enable_drag_and_drop(self):
         self.root.drop_target_register(DND_FILES)
@@ -162,4 +165,52 @@ class VideoAudioMergerApp:
         except subprocess.CalledProcessError as e:
             messagebox.showerror("錯誤", f"合成失敗：{e}")
 
+    
+    def preview_video(self):
+        if not self.video1 or not self.video2:
+            messagebox.showerror("錯誤", "請先選擇影片與聲音來源")
+            return
+
+        start_time = self.start_time.get()
+        volume = self.volume.get()
+
+        # 決定聲音與畫面來源
+        video_source = self.video2 if self.video1.endswith(".mp3") else self.video1
+        audio_source = self.video1 if video_source == self.video2 else self.video2
+
+        # 處理字幕路徑
+        subtitle_path = ""
+        if self.subtitle_file:
+            subtitle_path = self.subtitle_file.replace("\\", "/").replace(":", "\\:")
+
+        # 建立臨時預覽影片檔案
+        preview_file = "preview_temp.mp4"
+
+        # 合成指令（5 秒預覽）
+        command = [
+            "ffmpeg",
+            "-y",
+            "-ss", start_time,
+            "-t", "5",
+            "-i", audio_source,
+            "-ss", start_time,
+            "-t", "5",
+            "-i", video_source,
+            "-shortest",
+            "-filter:a", f"volume={volume}"
+        ]
+
+        if subtitle_path:
+            command += ["-vf", f"subtitles='{subtitle_path}'", "-c:v", "libx264"]
+        else:
+            command += ["-c:v", "copy"]
+
+        command += ["-c:a", "aac", preview_file]
+
+        try:
+            subprocess.run(command, check=True)
+            subprocess.run(["ffplay", "-autoexit", preview_file])
+            os.remove(preview_file)
+        except Exception as e:
+            messagebox.showerror("錯誤", f"預覽失敗：{e}")
 
