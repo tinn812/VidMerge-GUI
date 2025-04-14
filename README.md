@@ -8,12 +8,12 @@
 
 ## 功能特色
 
-- 📂 **拖曳操作**：將影片與聲音檔直接拖進來就能開始合併  
-- 🕒 **可裁剪片段**：輸入起始與結束時間，自訂要保留的區段  
-- 🔊 **音量調整**：可放大或縮小聲音音量  
-- 📼 **格式選擇**：支援 mp4、mkv、mp3  
-- 💾 **自訂輸出位置與檔名**  
-- ⚡ **快速合併**：底層使用 FFmpeg 處理，不影響畫質與效能  
+- **拖曳操作**：將影片與聲音檔直接拖進來就能開始合併  
+- **可裁剪片段**：輸入起始與結束時間，自訂要保留的區段  
+- **音量調整**：可放大或縮小聲音音量  
+- **格式選擇**：支援 mp4、mkv、mp3  
+- **自訂輸出位置與檔名**  
+- **快速合併**：底層使用 FFmpeg 處理，不影響畫質與效能  
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 使用方式
 
-### 🔧 安裝依賴
+### 安裝依賴
 
 1. 安裝 [Python](https://www.python.org/)（建議 Python 3.10+）  
 2. 安裝 [ffmpeg](https://ffmpeg.org/) 並加入系統環境變數  
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 ### ▶️ 執行程式
 
 ```bash
-python vidmerge_gui.py
+python main.py
 ```
 
 或使用 `.exe` 執行檔（注意：檔案較大）
@@ -69,9 +69,10 @@ python vidmerge_gui.py
 
 ```
 VidMerge-GUI/
-├── vidmerge_gui.py         # 主程式
-├── requirements.txt        # 相依套件
+├── main.py        # 主程式
+├── vidmerge_gui.py         # 功能
 ├── screenshot.png          # 介面截圖
+├── vidmerge_gui.spec       #打包exe時可用
 └── README.md
 ```
 
