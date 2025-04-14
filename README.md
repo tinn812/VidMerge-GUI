@@ -31,13 +31,9 @@
 
 ### 安裝依賴
 
-1. 安裝 [Python](https://www.python.org/)（建議 Python 3.10+）  
+1. 安裝 [Python](https://www.python.org/)（建議 Python 3.7+）  
 2. 安裝 [ffmpeg](https://ffmpeg.org/) 並加入系統環境變數  
-3. 安裝套件：
 
-```bash
-pip install -r requirements.txt
-```
 
 ---
 
@@ -47,7 +43,6 @@ pip install -r requirements.txt
 python main.py
 ```
 
-或使用 `.exe` 執行檔（注意：檔案較大）
 
 ---
 
@@ -72,7 +67,7 @@ VidMerge-GUI/
 ├── main.py        # 主程式
 ├── vidmerge_gui.py         # 功能
 ├── screenshot.png          # 介面截圖
-├── vidmerge_gui.spec       #打包exe時可用
+├── vidmerge_gui.spec       # 打包exe時可用
 └── README.md
 ```
 
