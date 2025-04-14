@@ -1,8 +1,16 @@
 import os
 import subprocess
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-from tkinterdnd2 import DND_FILES, TkinterDnD
+from tkinter import filedialog, messagebox
+from tkinterdnd2 import DND_FILES, TkinterDnD # 支援拖曳
+import ttkbootstrap as ttk                   # 支援主題樣式
+from ttkbootstrap.constants import *
+
+class ThemedDnDApp(TkinterDnD.Tk):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.style = ttk.Style("cosmo")  # 手動套主題
+
 
 class VideoAudioMergerApp:
     def __init__(self, root):
@@ -24,37 +32,71 @@ class VideoAudioMergerApp:
         self.enable_drag_and_drop()
 
     def create_widgets(self):
-        frame = ttk.Frame(self.root)
-        frame.pack(padx=10, pady=10)
+        container = ttk.Frame(self.root, padding=10)
+        container.pack(fill="both", expand=True)
 
-        self.status_label = ttk.Label(frame, text="拖曳影片/音訊進來", foreground="gray")
-        self.status_label.grid(row=0, column=0, columnspan=2)
+        # 主題切換選單（放右上）
+        theme_var = tk.StringVar(value="cosmo")
+        theme_menu = ttk.OptionMenu(container, theme_var, "cosmo", *ttk.Style().theme_names(), command=self.change_theme)
+        theme_menu.pack(side="top", anchor="ne", pady=5, padx=5)
 
-        ttk.Button(frame, text="選擇來源檔案 1", command=self.select_video1).grid(row=1, column=0, sticky="w")
-        ttk.Button(frame, text="選擇來源檔案 2", command=self.select_video2).grid(row=2, column=0, sticky="w")
+        # 狀態欄
+        self.status_label = ttk.Label(container, text="拖曳影片/音訊進來", foreground="gray")
+        self.status_label.pack(pady=(0, 10))
 
-        ttk.Button(frame, text="選擇字幕檔 (.srt)", command=self.select_subtitle_file).grid(row=9, column=0, sticky="w")
-        self.subtitle_label = ttk.Label(frame, text="未選擇字幕")
-        self.subtitle_label.grid(row=9, column=1, sticky="w")
+        # 區塊：來源檔案
+        source_box = ttk.LabelFrame(container, text="來源檔案", padding=10)
+        source_box.pack(fill="x", pady=5)
 
+        ttk.Button(source_box, text="選擇來源檔案 1", command=self.select_video1).pack(fill="x", pady=(2, 0))
+        self.video1_label = ttk.Label(source_box, text="未選擇", foreground="gray")
+        self.video1_label.pack(anchor="w", padx=5)
 
-        ttk.Label(frame, text="開始時間 (hh:mm:ss)").grid(row=3, column=0, sticky="w")
-        ttk.Entry(frame, textvariable=self.start_time).grid(row=3, column=1)
+        ttk.Button(source_box, text="選擇來源檔案 2", command=self.select_video2).pack(fill="x", pady=(8, 0))
+        self.video2_label = ttk.Label(source_box, text="未選擇", foreground="gray")
+        self.video2_label.pack(anchor="w", padx=5)
 
-        ttk.Label(frame, text="結束時間 (hh:mm:ss)").grid(row=4, column=0, sticky="w")
-        ttk.Entry(frame, textvariable=self.end_time).grid(row=4, column=1)
+        # 區塊：合成參數
+        param_box = ttk.LabelFrame(container, text="合成參數設定", padding=10)
+        param_box.pack(fill="x", pady=5)
 
-        ttk.Label(frame, text="音量倍率").grid(row=5, column=0, sticky="w")
-        ttk.Entry(frame, textvariable=self.volume).grid(row=5, column=1)
+        ttk.Label(param_box, text="開始時間 (hh:mm:ss)").grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        ttk.Entry(param_box, textvariable=self.start_time).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
 
-        ttk.Label(frame, text="輸出格式").grid(row=6, column=0, sticky="w")
-        ttk.Combobox(frame, textvariable=self.output_format, values=["mp4", "mkv", "mp3"]).grid(row=6, column=1)
+        ttk.Label(param_box, text="結束時間 (hh:mm:ss)").grid(row=1, column=0, sticky="w", padx=2, pady=2)
+        ttk.Entry(param_box, textvariable=self.end_time).grid(row=1, column=1, sticky="ew", padx=2, pady=2)
 
-        ttk.Button(frame, text="選擇輸出檔案", command=self.select_output_file).grid(row=7, column=0, sticky="w")
+        ttk.Label(param_box, text="音量倍率").grid(row=2, column=0, sticky="w", padx=2, pady=2)
+        ttk.Entry(param_box, textvariable=self.volume).grid(row=2, column=1, sticky="ew", padx=2, pady=2)
 
-        ttk.Button(frame, text="開始合成", command=self.start_merge).grid(row=8, column=0, columnspan=2, pady=10)
-        
-        ttk.Button(frame, text="預覽影片片段", command=self.preview_video).grid(row=10, column=0, columnspan=2)
+        param_box.columnconfigure(1, weight=1)
+
+        # 區塊：輸出設定
+        output_box = ttk.LabelFrame(container, text="輸出設定", padding=10)
+        output_box.pack(fill="x", pady=5)
+
+        ttk.Label(output_box, text="輸出格式").grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        ttk.Combobox(output_box, textvariable=self.output_format, values=["mp4", "mkv", "mp3"]).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
+
+        ttk.Button(output_box, text="選擇輸出檔案", command=self.select_output_file).grid(row=1, column=0, columnspan=2, sticky="ew", pady=5)
+
+        output_box.columnconfigure(1, weight=1)
+
+        # 區塊：字幕與預覽
+        subtitle_box = ttk.LabelFrame(container, text="進階功能", padding=10)
+        subtitle_box.pack(fill="x", pady=5)
+
+        ttk.Button(subtitle_box, text="選擇字幕檔 (.srt)", command=self.select_subtitle_file).grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        self.subtitle_label = ttk.Label(subtitle_box, text="未選擇字幕")
+        self.subtitle_label.grid(row=0, column=1, sticky="w", padx=2, pady=2)
+
+        ttk.Button(subtitle_box, text="預覽影片片段", command=self.preview_video).grid(row=1, column=0, columnspan=2, sticky="ew", padx=2, pady=5)
+
+        # 合成按鈕
+        ttk.Button(container, text="開始合成", command=self.start_merge, bootstyle="success").pack(fill="x", pady=(10, 0))
+
+    def change_theme(self, theme_name):
+        ttk.Style().theme_use(theme_name)
 
 
     def enable_drag_and_drop(self):
@@ -67,18 +109,24 @@ class VideoAudioMergerApp:
             file = file.strip('"')
             if not self.video1:
                 self.video1 = file
-                self.status_label.config(text=f"來源 1：{os.path.basename(file)}")
+                self.video1_label.config(text=f"來源 1：{os.path.basename(file)}")
             elif not self.video2:
                 self.video2 = file
-                self.status_label.config(text=f"來源 1：{os.path.basename(self.video1)}\n來源 2：{os.path.basename(file)}")
+                self.video2_label.config(text=f"來源 2：{os.path.basename(file)}")
             else:
                 messagebox.showinfo("提醒", "已選擇兩個檔案，請按『開始合成』")
 
     def select_video1(self):
-        self.video1 = filedialog.askopenfilename(title="選擇影片或音訊 1")
+        file = filedialog.askopenfilename(title="選擇影片或音訊 1")
+        if file:
+            self.video1 = file
+            self.video1_label.config(text=os.path.basename(file))
 
     def select_video2(self):
-        self.video2 = filedialog.askopenfilename(title="選擇影片或音訊 2")
+        file = filedialog.askopenfilename(title="選擇影片或音訊 2")
+        if file:
+            self.video2 = file
+            self.video2_label.config(text=os.path.basename(file))
 
     def select_subtitle_file(self):
         file = filedialog.askopenfilename(title="選擇字幕檔案", filetypes=[("Subtitle files", "*.srt")])
