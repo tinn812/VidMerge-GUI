@@ -53,6 +53,9 @@ class VideoAudioMergerApp:
         ttk.Button(frame, text="選擇輸出檔案", command=self.select_output_file).grid(row=7, column=0, sticky="w")
 
         ttk.Button(frame, text="開始合成", command=self.start_merge).grid(row=8, column=0, columnspan=2, pady=10)
+        
+        ttk.Button(frame, text="預覽影片片段", command=self.preview_video).grid(row=10, column=0, columnspan=2)
+
 
     def enable_drag_and_drop(self):
         self.root.drop_target_register(DND_FILES)
@@ -162,4 +165,27 @@ class VideoAudioMergerApp:
         except subprocess.CalledProcessError as e:
             messagebox.showerror("錯誤", f"合成失敗：{e}")
 
+    def preview_video(self):
+        if not self.video1 or not self.video2:
+            messagebox.showerror("錯誤", "請先選擇影片與聲音來源")
+            return
+
+        # 決定誰是畫面、誰是聲音
+        video_source = self.video2 if self.video1.endswith(".mp3") else self.video1
+        start_time = self.start_time.get()
+        volume = self.volume.get()
+
+        command = ["ffplay", "-ss", start_time, "-t", "5", "-i", video_source]
+
+        if self.subtitle_file:
+            subtitle_path = self.subtitle_file.replace("\\", "/").replace(":", "\\:")
+            command += ["-vf", f"subtitles='{subtitle_path}'"]
+
+        if volume != 1.0:
+            command += ["-af", f"volume={volume}"]
+
+        try:
+            subprocess.run(command)
+        except Exception as e:
+            messagebox.showerror("錯誤", f"預覽失敗：{e}")
 
